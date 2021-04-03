@@ -1,0 +1,13 @@
+{
+  "name": "app",
+  "version": "1.0.0",
+  "dependencies": {
+    "async": "^3.2.0",
+    "moment": "^2.29.1",
+    "moment-timezone": "^0.5.33",
+    "node-cron": "^3.0.0",
+    "playwright": "^1.9.2",
+    "request": "^2.88.2",
+    "uuid": "^8.3.2"
+  }
+}
