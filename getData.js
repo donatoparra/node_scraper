@@ -26,9 +26,25 @@ module.exports = async function getData(listaAgencias) {
                 const page = await context.newPage();
                 await page.goto("https://www.instagram.com/accounts/login/");
 
+                await page.waitForSelector("text=Accept All", { state: 'visible' });
+                await page.click("text=Accept All");
+
                 await page.waitForSelector('[type=submit]', {
                     state: 'visible'
-                })
+                });
+
+                await page.waitForSelector("text=Accept All", { state:'detached' });
+
+                // You can also take screenshots of pages
+                // await page.screenshot({
+                //   path: `ig-sign-in.png`,
+                // });
+
+                await page.click("[name=username]");
+
+                await page.waitForSelector('[type=submit]', {
+                    state: 'visible'
+                });
                 
                 // You can also take screenshots of pages
                 // await page.screenshot({
@@ -68,9 +84,6 @@ module.exports = async function getData(listaAgencias) {
                         
                         applogger(`datos de usuario: ${listaAgencias[n].usuario} obtenidos, empieza proceso ...`);
                         
-                        //console.log('result: ' + result);
-                        //break;
-        
                         for (let i=0;i<result.medias.length;i++) {
                             
                             // si es_video no procesamos
@@ -80,9 +93,10 @@ module.exports = async function getData(listaAgencias) {
                             
                             var fechaUnixPublicacion = moment.unix(result.medias[i].date);
                     
-                            //if (fechaHoy != fechaUnixPublicacion.format('YYYY-MM-DD')) {
-                            //    break;
-                            //}
+                            if (fechaHoy != fechaUnixPublicacion.format('YYYY-MM-DD')) {
+                                applogger('se omite por fecha de publicacion fechaHoy:' + fechaHoy + ' fechaPublicacion:' + fechaUnixPublicacion.format('YYYY-MM-DD'));
+                                continue;
+                            }
                             
                             try {
                                 var body = {
