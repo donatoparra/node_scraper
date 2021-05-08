@@ -5,7 +5,7 @@ const request = require('request');
 const cron = require('node-cron');
 
 
-cron.schedule('0 14 * * *', () => {
+cron.schedule('33 23 * * *', () => {
 	ejecutar();
     var data = 'agendado para ejecucion';
     applogger(data);

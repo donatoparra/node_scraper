@@ -95,7 +95,18 @@ module.exports = async function getData(listaAgencias) {
                     
                             if (fechaHoy != fechaUnixPublicacion.format('YYYY-MM-DD')) {
                                 applogger('se omite por fecha de publicacion fechaHoy:' + fechaHoy + ' fechaPublicacion:' + fechaUnixPublicacion.format('YYYY-MM-DD'));
-                                continue;
+
+                                // si es la ultima agencia y su ultima publicacion
+                                // cerramos y invocamos resolve
+                                // console.log(`${listaAgencias.length} ${n+1} # ${result.medias.length} ${i+1}`);
+                                if (listaAgencias.length == (n+1) && result.medias.length == (i+1)) {
+                                    applogger(`ingresa a cerrar instancia del navegador y ejecutar resolve`);
+                                    await browser.close();
+                                    resolve('procesado');
+                                } else {
+                                    continue;
+                                }
+
                             }
                             
                             try {
@@ -120,25 +131,47 @@ module.exports = async function getData(listaAgencias) {
                                 }
                             } catch (error) {
                                 applogger('se omite ' + i + ' de ' + listaAgencias[n].usuario);
-                                //console.log('descripcion: ' + result.medias[i].text);
-                                //console.log(error);
                                 continue;
                             }
-                            //console.log(JSON.stringify(body));
-                            
+
                             request.post({
                                 method: 'POST',
                                 uri: config.get('PUBLICACION_AGREGAR_URL'),
                                 headers: {'content-type': 'application/json'},
                                 json: JSON.stringify(body)  
-                            }, async function (error, res, body) {
+                            }, async function (error, res, _body) {
                                 
                                 if (error) {
                                     console.error(error);
                                     return;
                                 }
-                                
-                                applogger(`${listaAgencias[n].usuario} ${i} statusCode: ${res.statusCode}`);
+
+                                applogger(`${listaAgencias[n].usuario} ${i} guardar aws statusCode: ${res.statusCode}`);
+
+                                if (res.statusCode == 200) {
+
+                                    let bodyIMG = {
+                                        url: result.medias[i].display_url,
+                                        nombreImagen: result.medias[i].owner_id+'_'+result.medias[i].shortcode,
+                                        usuario: listaAgencias[n].usuario
+                                    }
+
+                                    request.post({
+                                        method: 'POST',
+                                        uri: config.get('PUBLICACION_BAJAR_IMAGEN'),
+                                        headers: {'content-type': 'application/json'},
+                                        json: JSON.stringify(bodyIMG)  
+                                    }, async function (errorImg, resImg, bodyImg) {
+                                        
+                                        if (errorImg) {
+                                            console.error(errorImg);
+                                            return;
+                                        }
+    
+                                        applogger(`${listaAgencias[n].usuario} ${i} guardar imagen statusCode: ${resImg.statusCode}`);
+        
+                                    });
+                                }
                                 
                                 // si es la ultima agencia y su ultima publicacion
                                 // cerramos y invocamos resolve
@@ -157,7 +190,7 @@ module.exports = async function getData(listaAgencias) {
         
                     }, n * 15000);
                     
-                    //break;
+                    break;
                     
                 }
             } catch (error) {
