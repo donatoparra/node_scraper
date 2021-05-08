@@ -152,7 +152,7 @@ module.exports = async function getData(listaAgencias) {
 
                                     let bodyIMG = {
                                         url: result.medias[i].display_url,
-                                        nombreImagen: result.medias[i].owner_id+'_'+result.medias[i].shortcode,
+                                        nombreImagen: result.medias[i].owner_id+'_'+result.medias[i].shortcode + '_' + result.medias[i].media_id,
                                         usuario: listaAgencias[n].usuario
                                     }
 
