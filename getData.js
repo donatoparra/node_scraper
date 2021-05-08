@@ -190,7 +190,7 @@ module.exports = async function getData(listaAgencias) {
         
                     }, n * 15000);
                     
-                    break;
+                    //break;
                     
                 }
             } catch (error) {
