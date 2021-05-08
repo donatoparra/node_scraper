@@ -151,7 +151,7 @@ module.exports = async function getData(listaAgencias) {
                                 if (res.statusCode == 200) {
 
                                     let bodyIMG = {
-                                        url: result.medias[i].display_url,
+                                        url: result.medias[i].thumbnail,
                                         nombreImagen: result.medias[i].owner_id+'_'+result.medias[i].shortcode + '_' + result.medias[i].media_id,
                                         usuario: listaAgencias[n].usuario
                                     }
