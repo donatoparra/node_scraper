@@ -5,12 +5,14 @@ const request = require('request');
 const cron = require('node-cron');
 
 
-cron.schedule('33 23 * * *', () => {
+cron.schedule('0 8,17 * * *', () => {
 	ejecutar();
     var data = 'agendado para ejecucion';
     applogger(data);
-});
-
+}, {
+   scheduled: true,
+   timezone: "America/Asuncion"
+ });
 
 var ejecutar = async function() {
 
@@ -18,7 +20,7 @@ var ejecutar = async function() {
 		method: 'GET',
 		uri: config.get('AGENCIAS_LISTA_URL'),
 		headers: {'content-type': 'application/json'}
-	}, async function (error, res, listaAgencias) {
+	}, async function (error, res, datos) {
 		
 		if (error) {
 			console.error(error);
@@ -28,9 +30,9 @@ var ejecutar = async function() {
 	
 		applogger(`lista agencias statusCode: ${res.statusCode}`);
 	
-		listaAgencias = JSON.parse(listaAgencias);
-	
-		if (res.statusCode == 200) {
+		let listaAgencias = JSON.parse(res.body);
+		
+		if (res.statusCode == 2000) {
 
 			try {
 				await getData(listaAgencias.body);
