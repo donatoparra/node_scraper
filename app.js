@@ -33,7 +33,7 @@ var ejecutar = async function() {
 		if (res.statusCode == 200) {
 
 			try {
-				await getData(listaAgencias);
+				await getData(listaAgencias.body);
 
 				var data = 'proceso finalizado';
 				applogger(data);
