@@ -32,7 +32,7 @@ var ejecutar = async function() {
 	
 		let listaAgencias = JSON.parse(res.body);
 		
-		if (res.statusCode == 2000) {
+		if (res.statusCode == 200) {
 
 			try {
 				await getData(listaAgencias.body);
