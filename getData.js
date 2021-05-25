@@ -138,7 +138,7 @@ module.exports = async function getData(listaAgencias) {
                                 method: 'POST',
                                 uri: config.get('PUBLICACION_AGREGAR_URL'),
                                 headers: {'content-type': 'application/json'},
-                                json: JSON.stringify(body)  
+                                json: body
                             }, async function (error, res, _body) {
                                 
                                 if (error) {
