@@ -230,7 +230,7 @@ module.exports = async function getData(listaAgencias) {
     });
 }
 
-var verificarSiCerrarNavegador = function(donde, listaAgencias, result, n, i, resolve) {
+var verificarSiCerrarNavegador = async function(donde, listaAgencias, result, n, i, resolve) {
     // si es la ultima agencia y su ultima publicacion
     // cerramos y invocamos resolve
     // console.log(`${listaAgencias.length} ${n+1} # ${result.medias.length} ${i+1}`);
