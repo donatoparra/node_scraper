@@ -60,133 +60,162 @@ module.exports = async function getData(listaAgencias) {
                 for (let n=0;n<listaAgencias.length;n++) {
 
                     applogger(`inicio procesando agencia: ${listaAgencias[n].usuario}`);
-        
+                    
                     setTimeout(async function poblarPublicaciones() {
                         
-                        await page.goto(`https://www.instagram.com/${listaAgencias[n].usuario}`);
-                        await page.waitForSelector("img", {
-                            state: 'visible',
-                        });
-                        
-                        // await page.screenshot({ path: `profile.png` });
-                        // Execute code in the DOM
-                        const html = await page.content();
-                        //console.log(data);
-                        /*
-                        const data = await page.evaluate(() => {
-                            const images = document.querySelectorAll("img");
-                            const urls = Array.from(images).map((v) => v.src);
-                            return urls;
-                        });
-                        */   
-                        
-                        var result = await parsearDatosHtml(html);
-                        
-                        applogger(`datos de usuario: ${listaAgencias[n].usuario} obtenidos, empieza proceso ...`);
-                        
-                        for (let i=0;i<result.medias.length;i++) {
-                            
-                            // si es_video no procesamos
-                            if (result.medias[i].is_video) {
-                                continue;
-                            }
-                            
-                            var fechaUnixPublicacion = moment.unix(result.medias[i].date);
-                    
-                            if (fechaHoy != fechaUnixPublicacion.format('YYYY-MM-DD')) {
-                                applogger('se omite por fecha de publicacion fechaHoy:' + fechaHoy + ' fechaPublicacion:' + fechaUnixPublicacion.format('YYYY-MM-DD'));
+                        try {
 
-                                // si es la ultima agencia y su ultima publicacion
-                                // cerramos y invocamos resolve
-                                // console.log(`${listaAgencias.length} ${n+1} # ${result.medias.length} ${i+1}`);
-                                if (listaAgencias.length == (n+1) && result.medias.length == (i+1)) {
-                                    applogger(`ingresa a cerrar instancia del navegador y ejecutar resolve`);
-                                    await browser.close();
-                                    resolve('procesado');
-                                } else {
+                            await page.goto(`https://www.instagram.com/${listaAgencias[n].usuario}`);
+                            await page.waitForSelector("img", {
+                                state: 'visible',
+                            });
+                            
+                            // await page.screenshot({ path: `profile.png` });
+                            // Execute code in the DOM
+                            const html = await page.content();
+                            
+                            var result = await parsearDatosHtml(html);
+                            
+                            applogger(`datos de usuario: ${listaAgencias[n].usuario} obtenidos, empieza proceso ...`);
+                            
+                            for (let i=0;i<result.medias.length;i++) {
+                                
+                                var fechaUnixPublicacion = moment.unix(result.medias[i].date);
+                        
+                                if (fechaHoy != fechaUnixPublicacion.format('YYYY-MM-DD')) {
+                                    applogger('se omite por fecha de publicacion fechaHoy:' + fechaHoy + ' fechaPublicacion:' + fechaUnixPublicacion.format('YYYY-MM-DD'));
+
+                                    /*
+                                    // si es la ultima agencia y su ultima publicacion
+                                    // cerramos y invocamos resolve
+                                    // console.log(`${listaAgencias.length} ${n+1} # ${result.medias.length} ${i+1}`);
+                                    applogger(`no_en_fecha ${n} ${i} ${listaAgencias.length} ${n+1} # ${result.medias.length} ${i+1}`);
+                                    if (listaAgencias.length == (n+1) && result.medias.length == (i+1)) {
+                                        applogger(`ingresa a cerrar instancia del navegador y ejecutar resolve`);
+                                        await browser.close();
+                                        resolve('procesado');
+                                    } else {
+                                        continue;
+                                    }
+                                    */
+                                    verificarSiCerrarNavegador('no_en_fecha', listaAgencias, result, n, i, resolve);
+
                                     continue;
                                 }
 
-                            }
-                            
-                            try {
-                                var body = {
-                                    "id": uuidv4(),
-                                    "fechaPublicacion": fechaUnixPublicacion.format('YYYY-MM-DD'),
-                                    "horaPublicacion": fechaUnixPublicacion.format('HH:mm:ss'),
-                                    "media_id": result.medias[i].media_id,
-                                    "owner_id": result.medias[i].owner_id,
-                                    "shortcode": result.medias[i].shortcode,
-                                    "is_video": result.medias[i].is_video,
-                                    "like_count": result.medias[i].like_count,
-                                    "miniatura": result.medias[i].thumbnail,
-                                    "imagenPublicacion": result.medias[i].display_url,
-                                    
-                                    "descripcion": quitarAcentos(result.medias[i].text.toLowerCase()),
-                                    
-                                    "fechaAlta": fechaHoy,
-                                    "horaALta": moment().format('HH:mm:ss'),
-                                    "usuarioInstagram": listaAgencias[n].usuario,
-                                    "pais": "paraguay"
-                                }
-                            } catch (error) {
-                                applogger('se omite ' + i + ' de ' + listaAgencias[n].usuario);
-                                continue;
-                            }
+                                // si es_video no procesamos
+                                if (result.medias[i].is_video) {
 
-                            request.post({
-                                method: 'POST',
-                                uri: config.get('PUBLICACION_AGREGAR_URL'),
-                                headers: {'content-type': 'application/json'},
-                                json: body
-                            }, async function (error, res, _body) {
+                                    /*
+                                    applogger(`en_fecha ${n} ${i} ${listaAgencias.length} ${n+1} # ${result.medias.length} ${i+1}`);
+                                    if (listaAgencias.length == (n+1) && result.medias.length == (i+1)) {
+                                        applogger(`ingresa a cerrar instancia del navegador y ejecutar resolve`);
+                                        await browser.close();
+                                        resolve('procesado');
+                                    }
+                                    */
+                                    verificarSiCerrarNavegador('es_video', listaAgencias, result, n, i, resolve);
+
+                                    continue;
+                                }
                                 
-                                if (error) {
-                                    console.error(error);
-                                    return;
+                                try {
+                                    var body = {
+                                        "id": uuidv4(),
+                                        "fechaPublicacion": fechaUnixPublicacion.format('YYYY-MM-DD'),
+                                        "horaPublicacion": fechaUnixPublicacion.format('HH:mm:ss'),
+                                        "media_id": result.medias[i].media_id,
+                                        "owner_id": result.medias[i].owner_id,
+                                        "shortcode": result.medias[i].shortcode,
+                                        "is_video": result.medias[i].is_video,
+                                        "like_count": result.medias[i].like_count,
+                                        "miniatura": result.medias[i].thumbnail,
+                                        "imagenPublicacion": result.medias[i].display_url,
+                                        
+                                        "descripcion": quitarAcentos(result.medias[i].text.toLowerCase()),
+                                        
+                                        "fechaAlta": fechaHoy,
+                                        "horaALta": moment().format('HH:mm:ss'),
+                                        "usuarioInstagram": listaAgencias[n].usuario,
+                                        "pais": "paraguay"
+                                    }
+                                } catch (error) {
+                                    applogger('se omite ' + i + ' de ' + listaAgencias[n].usuario);
+
+                                    /*
+                                    applogger(`error_en_body ${n} ${i} ${listaAgencias.length} ${n+1} # ${result.medias.length} ${i+1}`);
+                                    if (listaAgencias.length == (n+1) && result.medias.length == (i+1)) {
+                                        applogger(`ingresa a cerrar instancia del navegador y ejecutar resolve`);
+                                        await browser.close();
+                                        resolve('procesado');
+                                    }
+                                    */
+                                    verificarSiCerrarNavegador('error_en_body', listaAgencias, result, n, i, resolve);
+                                    continue;
                                 }
 
-                                applogger(`${listaAgencias[n].usuario} ${i} guardar aws statusCode: ${res.statusCode}`);
-
-                                if (res.statusCode == 200) {
-
-                                    let bodyIMG = {
-                                        url: result.medias[i].thumbnail,
-                                        nombreImagen: result.medias[i].owner_id+'_'+result.medias[i].shortcode + '_' + result.medias[i].media_id,
-                                        usuario: listaAgencias[n].usuario
+                                request.post({
+                                    method: 'POST',
+                                    uri: config.get('PUBLICACION_AGREGAR_URL'),
+                                    headers: {'content-type': 'application/json'},
+                                    json: body
+                                }, async function (error, res, _body) {
+                                    
+                                    if (error) {
+                                        console.error(error);
+                                        return;
                                     }
 
-                                    request.post({
-                                        method: 'POST',
-                                        uri: config.get('PUBLICACION_BAJAR_IMAGEN'),
-                                        headers: {'content-type': 'application/json'},
-                                        json: JSON.stringify(bodyIMG)  
-                                    }, async function (errorImg, resImg, bodyImg) {
-                                        
-                                        if (errorImg) {
-                                            console.error(errorImg);
-                                            return;
-                                        }
-    
-                                        applogger(`${listaAgencias[n].usuario} ${i} guardar imagen statusCode: ${resImg.statusCode}`);
-        
-                                    });
-                                }
-                                
-                                // si es la ultima agencia y su ultima publicacion
-                                // cerramos y invocamos resolve
-                                // console.log(`${listaAgencias.length} ${n+1} # ${result.medias.length} ${i+1}`);
-                                if (listaAgencias.length == (n+1) && result.medias.length == (i+1)) {
-                                    applogger(`ingresa a cerrar instancia del navegador y ejecutar resolve`);
-                                    await browser.close();
-                                    resolve('procesado');
-                                }
+                                    applogger(`${listaAgencias[n].usuario} ${i} guardar aws statusCode: ${res.statusCode}`);
 
-                            });
-                            
-                        }
+                                    if (res.statusCode == 200) {
+
+                                        let bodyIMG = {
+                                            url: result.medias[i].thumbnail,
+                                            nombreImagen: result.medias[i].owner_id+'_'+result.medias[i].shortcode + '_' + result.medias[i].media_id,
+                                            usuario: listaAgencias[n].usuario
+                                        }
+
+                                        request.post({
+                                            method: 'POST',
+                                            uri: config.get('PUBLICACION_BAJAR_IMAGEN'),
+                                            headers: {'content-type': 'application/json'},
+                                            json: JSON.stringify(bodyIMG)  
+                                        }, async function (errorImg, resImg, bodyImg) {
+                                            
+                                            if (errorImg) {
+                                                console.error(errorImg);
+                                                return;
+                                            }
         
-                        applogger(`fin procesando agencia: ${listaAgencias[n].usuario}`);
+                                            applogger(`${listaAgencias[n].usuario} ${i} guardar imagen statusCode: ${resImg.statusCode}`);
+            
+                                        });
+                                    }
+                                    
+                                    /*
+                                    // si es la ultima agencia y su ultima publicacion
+                                    // cerramos y invocamos resolve
+                                    // console.log(`${listaAgencias.length} ${n+1} # ${result.medias.length} ${i+1}`);
+                                    applogger(`en_fecha ${n} ${i} ${listaAgencias.length} ${n+1} # ${result.medias.length} ${i+1}`);
+                                    if (listaAgencias.length == (n+1) && result.medias.length == (i+1)) {
+                                        applogger(`ingresa a cerrar instancia del navegador y ejecutar resolve`);
+                                        await browser.close();
+                                        resolve('procesado');
+                                    }
+                                    */
+
+                                    verificarSiCerrarNavegador('en_fecha', listaAgencias, result, n, i, resolve);
+
+                                });
+                                
+                            }
+            
+                            applogger(`fin procesando agencia: ${listaAgencias[n].usuario}`);
+                        } catch (_error) {
+                            applogger('error en timer ' + _error);
+                            verificarSiCerrarNavegador('en_timer', listaAgencias, result, n, i, resolve);
+                        }
         
                     }, n * 15000);
                     
@@ -199,6 +228,18 @@ module.exports = async function getData(listaAgencias) {
             }
         
     });
+}
+
+var verificarSiCerrarNavegador = function(donde, listaAgencias, result, n, i, resolve) {
+    // si es la ultima agencia y su ultima publicacion
+    // cerramos y invocamos resolve
+    // console.log(`${listaAgencias.length} ${n+1} # ${result.medias.length} ${i+1}`);
+    applogger(`${donde} ${n} ${i} ${listaAgencias.length} ${n+1} # ${result.medias.length} ${i+1}`);
+    if (listaAgencias.length == (n+1) && result.medias.length == (i+1)) {
+        applogger(`ingresa a cerrar instancia del navegador y ejecutar resolve`);
+        await browser.close();
+        resolve('procesado');
+    }
 }
 
 
