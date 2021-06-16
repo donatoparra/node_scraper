@@ -98,7 +98,7 @@ module.exports = async function getData(listaAgencias) {
                                         continue;
                                     }
                                     */
-                                    verificarSiCerrarNavegador('no_en_fecha', listaAgencias, result, n, i, resolve);
+                                    verificarSiCerrarNavegador('no_en_fecha', listaAgencias, result, n, i, resolve, browser);
 
                                     continue;
                                 }
@@ -114,7 +114,7 @@ module.exports = async function getData(listaAgencias) {
                                         resolve('procesado');
                                     }
                                     */
-                                    verificarSiCerrarNavegador('es_video', listaAgencias, result, n, i, resolve);
+                                    verificarSiCerrarNavegador('es_video', listaAgencias, result, n, i, resolve, browser);
 
                                     continue;
                                 }
@@ -150,7 +150,7 @@ module.exports = async function getData(listaAgencias) {
                                         resolve('procesado');
                                     }
                                     */
-                                    verificarSiCerrarNavegador('error_en_body', listaAgencias, result, n, i, resolve);
+                                    verificarSiCerrarNavegador('error_en_body', listaAgencias, result, n, i, resolve, browser);
                                     continue;
                                 }
 
@@ -205,7 +205,7 @@ module.exports = async function getData(listaAgencias) {
                                     }
                                     */
 
-                                    verificarSiCerrarNavegador('en_fecha', listaAgencias, result, n, i, resolve);
+                                    verificarSiCerrarNavegador('en_fecha', listaAgencias, result, n, i, resolve, browser);
 
                                 });
                                 
@@ -214,7 +214,7 @@ module.exports = async function getData(listaAgencias) {
                             applogger(`fin procesando agencia: ${listaAgencias[n].usuario}`);
                         } catch (_error) {
                             applogger('error en timer ' + _error);
-                            verificarSiCerrarNavegador('en_timer', listaAgencias, result, n, i, resolve);
+                            verificarSiCerrarNavegador('en_timer', listaAgencias, result, n, i, resolve, browser);
                         }
         
                     }, n * 15000);
@@ -230,7 +230,7 @@ module.exports = async function getData(listaAgencias) {
     });
 }
 
-var verificarSiCerrarNavegador = async function(donde, listaAgencias, result, n, i, resolve) {
+var verificarSiCerrarNavegador = async function(donde, listaAgencias, result, n, i, resolve, browser) {
     // si es la ultima agencia y su ultima publicacion
     // cerramos y invocamos resolve
     // console.log(`${listaAgencias.length} ${n+1} # ${result.medias.length} ${i+1}`);
