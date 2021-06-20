@@ -214,7 +214,7 @@ module.exports = async function getData(listaAgencias) {
                             applogger(`fin procesando agencia: ${listaAgencias[n].usuario}`);
                         } catch (_error) {
                             applogger('error en timer ' + _error);
-                            verificarSiCerrarNavegador('en_timer', listaAgencias, result, n, i, resolve, browser);
+                            reject('no_procesado por error en timer: ' + _error);
                         }
         
                     }, n * 15000);
