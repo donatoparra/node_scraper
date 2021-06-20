@@ -214,7 +214,8 @@ module.exports = async function getData(listaAgencias) {
                             applogger(`fin procesando agencia: ${listaAgencias[n].usuario}`);
                         } catch (_error) {
                             applogger('error en timer ' + _error);
-                            reject('no_procesado por error en timer: ' + _error);
+                            await browser.close();
+                            reject('no_procesado por error en timer:' + _error);
                         }
         
                     }, n * 15000);
@@ -224,6 +225,7 @@ module.exports = async function getData(listaAgencias) {
                 }
             } catch (error) {
                 applogger('errgral ' + error);
+                await browser.close();
                 reject('no_procesado');
             }
         
@@ -241,6 +243,7 @@ var verificarSiCerrarNavegador = async function(donde, listaAgencias, result, n,
         resolve('procesado');
     }
 }
+
 
 
 var parsearDatosHtml = async function (html) {
