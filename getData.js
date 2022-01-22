@@ -65,14 +65,15 @@ module.exports = async function getData(listaAgencias) {
                         
                         try {
 
-                            await page.goto(`https://www.instagram.com/${listaAgencias[n].usuario}`);
-                            await page.waitForSelector("img", {
+                            const newtab = await context.newPage();
+                            await newtab.goto(`https://www.instagram.com/${listaAgencias[n].usuario}`);
+                            await newtab.waitForSelector("img", {
                                 state: 'visible',
                             });
                             
                             // await page.screenshot({ path: `profile.png` });
                             // Execute code in the DOM
-                            const html = await page.content();
+                            const html = await newtab.content();
                             
                             var result = await parsearDatosHtml(html);
                             
